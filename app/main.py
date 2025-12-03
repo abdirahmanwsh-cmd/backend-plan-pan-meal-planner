@@ -1,13 +1,12 @@
 from fastapi import FastAPI
+from app.api.api import api_router
+from app.db.database import Base, engine
+# Import models so SQLAlchemy knows about them
+from app import models  # noqa: F401  (used for side effects)
 
-from .db.database import Base, engine
-from .api.api import api_router
+app = FastAPI()
 
-# Create DB tables (for development / MVP)
-Base.metadata.create_all(bind=engine)
-
-# THIS is what uvicorn is looking for:
-app = FastAPI(title="FitPlate API")
-
-# Include our API router
 app.include_router(api_router)
+
+# Create tables if they don't exist
+Base.metadata.create_all(bind=engine)
