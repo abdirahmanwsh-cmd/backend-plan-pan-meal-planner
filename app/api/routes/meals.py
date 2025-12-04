@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from typing import List
-from app.schemas.meal import MealCreate, MealUpdate, MealOut
+from app.schemas.meal import MealCreate, MealUpdate, MealResponse
 from app.db.database import SessionLocal
 from sqlalchemy.orm import Session
 
@@ -15,22 +15,22 @@ def get_db():
         db.close()
 
 # GET all meals
-@router.get("/", response_model=List[MealOut])
+@router.get("/", response_model=List[MealResponse])
 def get_meals(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     return []  
 
 # GET a single meal
-@router.get("/{meal_id}", response_model=MealOut)
+@router.get("/{meal_id}", response_model=MealResponse)
 def get_meal(meal_id: int, db: Session = Depends(get_db)):
     return {}  
 
 # POST create meal
-@router.post("/", response_model=MealOut)
+@router.post("/", response_model=MealResponse)
 def create_meal(meal: MealCreate, db: Session = Depends(get_db)):
     return {}  
 
 # PUT update meal
-@router.put("/{meal_id}", response_model=MealOut)
+@router.put("/{meal_id}", response_model=MealResponse)
 def update_meal(meal_id: int, meal: MealUpdate, db: Session = Depends(get_db)):
     return {}  
 
