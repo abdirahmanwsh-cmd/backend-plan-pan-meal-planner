@@ -60,3 +60,4 @@ def delete_meal(meal_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"msg": f"Meal {meal_id} deleted"}
 
+
