@@ -2,12 +2,12 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from sqlalchemy.orm import Session
 from app.schemas.meal import MealCreate, MealUpdate, MealResponse
-from app.models.meal import Meal
 from app.db.database import SessionLocal
+from app.models.meal import Meal
 
 router = APIRouter(prefix="/meals", tags=["Meals"])
 
-# Simple DB session dependency
+# simple DB session dependency
 def get_db():
     db = SessionLocal()
     try:
@@ -15,13 +15,13 @@ def get_db():
     finally:
         db.close()
 
-# GET all meals
+# get all meals
 @router.get("/", response_model=List[MealResponse])
-def get_meals(db: Session = Depends(get_db)):
-    meals = db.query(Meal).all()
+def get_meals(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+    meals = db.query(Meal).offset(skip).limit(limit).all()
     return meals
 
-# GET single meal
+# get a single meal by id
 @router.get("/{meal_id}", response_model=MealResponse)
 def get_meal(meal_id: int, db: Session = Depends(get_db)):
     meal = db.query(Meal).filter(Meal.id == meal_id).first()
@@ -29,7 +29,7 @@ def get_meal(meal_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Meal not found")
     return meal
 
-# CREATE meal
+# create a new meal
 @router.post("/", response_model=MealResponse)
 def create_meal(meal: MealCreate, db: Session = Depends(get_db)):
     new_meal = Meal(**meal.dict())
@@ -38,19 +38,19 @@ def create_meal(meal: MealCreate, db: Session = Depends(get_db)):
     db.refresh(new_meal)
     return new_meal
 
-# UPDATE meal
+# update an existing meal
 @router.put("/{meal_id}", response_model=MealResponse)
 def update_meal(meal_id: int, meal: MealUpdate, db: Session = Depends(get_db)):
-    existing = db.query(Meal).filter(Meal.id == meal_id).first()
-    if not existing:
+    existing_meal = db.query(Meal).filter(Meal.id == meal_id).first()
+    if not existing_meal:
         raise HTTPException(status_code=404, detail="Meal not found")
     for key, value in meal.dict(exclude_none=True).items():
-        setattr(existing, key, value)
+        setattr(existing_meal, key, value)
     db.commit()
-    db.refresh(existing)
-    return existing
+    db.refresh(existing_meal)
+    return existing_meal
 
-# DELETE meal
+# delete a meal
 @router.delete("/{meal_id}")
 def delete_meal(meal_id: int, db: Session = Depends(get_db)):
     meal = db.query(Meal).filter(Meal.id == meal_id).first()
@@ -58,6 +58,15 @@ def delete_meal(meal_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Meal not found")
     db.delete(meal)
     db.commit()
-    return {"msg": f"Meal {meal_id} deleted"}
+    return {"msg": f"Meal {meal_id} deleted successfully"}
 
+# toggle favorite for a meal
+@router.patch("/{meal_id}/favorite")
+def toggle_favorite(meal_id: int, db: Session = Depends(get_db)):
+    meal = db.query(Meal).filter(Meal.id == meal_id).first()
+    if not meal:
+        raise HTTPException(status_code=404, detail="Meal not found")
+    meal.is_favorite = not meal.is_favorite
+    db.commit()
+    return {"favorite": meal.is_favorite}
 
