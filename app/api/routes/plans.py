@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends
-from sqlalchemy.orm import Session
 from typing import List
-from app.models.plan import MealPlan, MealSlot
+from sqlalchemy.orm import Session
 from app.schemas.plan import MealPlanCreate, MealPlanResponse, MealSlotCreate, MealSlotResponse
+from app.models.plan import MealPlan, MealSlot
 from app.db.database import SessionLocal
 
 router = APIRouter(prefix="/plans", tags=["Meal Plans"])
 
-# simple DB session dependency
+# Simple DB session dependency
 def get_db():
     db = SessionLocal()
     try:
@@ -15,15 +15,15 @@ def get_db():
     finally:
         db.close()
 
-# get current user's plan (just returns first for now)
+# GET current plan (just returns the first plan for now)
 @router.get("/current", response_model=MealPlanResponse)
 def get_current_plan(db: Session = Depends(get_db)):
     plan = db.query(MealPlan).first()
     if not plan:
-        raise HTTPException(status_code=404, detail="No plan found")
+        raise HTTPException(status_code=404, detail="No meal plan found")
     return plan
 
-# create a new weekly plan
+# CREATE new plan
 @router.post("/", response_model=MealPlanResponse)
 def create_plan(plan: MealPlanCreate, db: Session = Depends(get_db)):
     new_plan = MealPlan(**plan.dict())
@@ -32,32 +32,40 @@ def create_plan(plan: MealPlanCreate, db: Session = Depends(get_db)):
     db.refresh(new_plan)
     return new_plan
 
-# add a meal slot to a plan
+# ADD a slot to a plan
 @router.post("/{plan_id}/slots", response_model=MealSlotResponse)
-def add_meal_slot(plan_id: int, slot: MealSlotCreate, db: Session = Depends(get_db)):
+def add_slot(plan_id: int, slot: MealSlotCreate, db: Session = Depends(get_db)):
     plan = db.query(MealPlan).filter(MealPlan.id == plan_id).first()
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found")
-    new_slot = MealSlot(plan_id=plan_id, **slot.dict())
+    new_slot = MealSlot(**slot.dict(), plan_id=plan_id)
     db.add(new_slot)
     db.commit()
     db.refresh(new_slot)
     return new_slot
 
-# update a meal slot
+# UPDATE a slot
 @router.put("/slots/{slot_id}", response_model=MealSlotResponse)
-def update_meal_slot(slot_id: int, slot: MealSlotCreate, db: Session = Depends(get_db)):
-    existing_slot = db.query(MealSlot).filter(MealSlot.id == slot_id).first()
-    if not existing_slot:
+def update_slot(slot_id: int, slot: MealSlotCreate, db: Session = Depends(get_db)):
+    existing = db.query(MealSlot).filter(MealSlot.id == slot_id).first()
+    if not existing:
         raise HTTPException(status_code=404, detail="Slot not found")
-    for key, value in slot.dict(exclude_none=True).items():
-        setattr(existing_slot, key, value)
+    for key, value in slot.dict().items():
+        setattr(existing, key, value)
     db.commit()
-    db.refresh(existing_slot)
-    return existing_slot
+    db.refresh(existing)
+    return existing
 
-# get all slots for a plan
-@router.get("/{plan_id}/slots", response_model=List[MealSlotResponse])
-def get_slots(plan_id: int, db: Session = Depends(get_db)):
-    slots = db.query(MealSlot).filter(MealSlot.plan_id == plan_id).all()
-    return slots
+# GET shopping list (aggregate meals in current plan)
+@router.get("/shopping-list", response_model=List[str])
+def get_shopping_list(db: Session = Depends(get_db)):
+    plan = db.query(MealPlan).first()
+    if not plan:
+        return []
+    ingredients = []
+    for slot in plan.slots:
+        if hasattr(slot.meal, "tags") and slot.meal.tags:
+            ingredients += slot.meal.tags.split(",")  # just using tags as ingredients
+    # remove duplicates
+    unique_ingredients = list(set(ingredients))
+    return unique_ingredients
