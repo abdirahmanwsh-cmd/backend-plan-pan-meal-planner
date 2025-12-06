@@ -69,3 +69,4 @@ def toggle_favorite(meal_id: int, db: Session = Depends(get_db)):
     meal.is_favorite = not meal.is_favorite
     db.commit()
     return {"favorite": meal.is_favorite}
+
