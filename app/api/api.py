@@ -1,12 +1,18 @@
 from fastapi import APIRouter
-from .routes import auth
+from .routes import auth, meals, plans
 
 api_router = APIRouter()
 
-# Simple health check
+# Health check
 @api_router.get("/health", tags=["health"])
 def health_check():
     return {"status": "ok"}
 
-# Authentication routes
-api_router.include_router(auth.router)
+# Auth endpoints
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+
+# Meal CRUD endpoints
+api_router.include_router(meals.router, prefix="/meals", tags=["meals"])
+
+# Weekly plans, slots, shopping list
+api_router.include_router(plans.router, prefix="/plans", tags=["plans"])
