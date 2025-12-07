@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from sqlalchemy.orm import Session
 from app.schemas.plan import MealPlanCreate, MealPlanResponse, MealSlotCreate, MealSlotResponse
-from app.models.plan import MealPlan, MealSlot
+from app.models.plan import MealPlan
+from app.models.mealslot import MealSlot
 from app.db.database import SessionLocal
 
 router = APIRouter(prefix="/plans", tags=["Meal Plans"])
