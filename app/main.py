@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import create_engine
+from app.db.database import Base, engine
+from app.api.api import api_router
 
-from .db.database import Base, engine
-from .api.api import api_router
 
+# ...existing code...
 
 # 1) Create DB tables (for development / MVP)
 Base.metadata.create_all(bind=engine)
