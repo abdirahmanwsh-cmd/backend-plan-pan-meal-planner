@@ -8,4 +8,4 @@ class UserOut(BaseModel):
     name: Optional[str] = None  # Python 3.8-friendly
 
     class Config:
-        orm_mode = True
+        from_attributes = True

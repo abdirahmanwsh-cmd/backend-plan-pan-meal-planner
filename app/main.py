@@ -5,7 +5,7 @@ from app.db.database import Base, engine
 from app.api.api import api_router
 
 
-# ...existing code...
+
 
 # 1) Create DB tables (for development / MVP)
 Base.metadata.create_all(bind=engine)

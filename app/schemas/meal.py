@@ -9,7 +9,7 @@ class MealBase(BaseModel):
 
 # Schema for creating a new meal
 class MealCreate(MealBase):
-    pass  # nothing extra, same fields as base
+    pass  
 
 # Schema for updating an existing meal
 class MealUpdate(BaseModel):
@@ -24,4 +24,4 @@ class MealResponse(MealBase):
     user_id: Optional[int] = None
 
     class Config:
-        orm_mode = True  # allows returning SQLAlchemy models directly
+        from_attributes = True  # allows returning SQLAlchemy models directly

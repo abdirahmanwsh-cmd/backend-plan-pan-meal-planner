@@ -1,8 +1,8 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.core.firebase import verify_token   # from firebase.py
-from app.schemas.user import UserOut           # response shape for /auth/me
+from app.core.firebase import verify_token  
+from app.schemas.user import UserOut          
 
 
 # Read Authorization: Bearer <token> from headers

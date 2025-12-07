@@ -17,7 +17,7 @@ class MealSlotResponse(MealSlotCreate):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Schema for meal plan response
 class MealPlanResponse(BaseModel):
@@ -26,4 +26,4 @@ class MealPlanResponse(BaseModel):
     slots: List[MealSlotResponse] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True

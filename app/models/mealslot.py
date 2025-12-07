@@ -8,8 +8,8 @@ class MealSlot(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     plan_id = Column(Integer, ForeignKey("meal_plans.id"), nullable=False)
-    day = Column(String, nullable=False)        # e.g. "Monday"
-    meal_time = Column(String, nullable=False)  # e.g. "Breakfast"
+    day = Column(String, nullable=False)        
+    meal_time = Column(String, nullable=False)  
     meal_id = Column(Integer, ForeignKey("meals.id"), nullable=False)
 
     plan = relationship("MealPlan", back_populates="slots")
