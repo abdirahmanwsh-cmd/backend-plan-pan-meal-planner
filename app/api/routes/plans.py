@@ -16,7 +16,7 @@ def get_db():
     finally:
         db.close()
 
-# GET current plan (just returns the first plan for now)
+# GET current plan 
 @router.get("/current", response_model=MealPlanResponse)
 def get_current_plan(db: Session = Depends(get_db)):
     plan = db.query(MealPlan).first()

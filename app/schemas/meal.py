@@ -1,27 +1,32 @@
-from pydantic import BaseModel
 from typing import Optional
+from pydantic import BaseModel
 
-# Base schema for meals, used for create/update
+
+# ---------- Shared fields for all meal requests ----------
 class MealBase(BaseModel):
     name: str
     calories: int
-    tags: Optional[str] = None  # optional comma-separated tags like "high-protein,lunch"
+    tags: Optional[str] = None          # simple comma-separated tags
+    is_favorite: bool = False           # default: not favourite
 
-# Schema for creating a new meal
+
+# ---------- For creating a new meal ----------
 class MealCreate(MealBase):
-    pass  
+    pass
 
-# Schema for updating an existing meal
+
+# ---------- For updating an existing meal ----------
 class MealUpdate(BaseModel):
     name: Optional[str] = None
     calories: Optional[int] = None
     tags: Optional[str] = None
+    is_favorite: Optional[bool] = None
 
-# Schema for sending meal info back to frontend
-class MealResponse(MealBase):
+
+# ---------- Full response object (what the frontend receives) ----------
+class MealOut(MealBase):
     id: int
-    is_favorite: Optional[bool] = False
-    user_id: Optional[int] = None
+    user_id: Optional[int] = None       # included for auth / suggestion features
 
     class Config:
-        from_attributes = True 
+        from_attributes = True                # allow reading from SQLAlchemy models
