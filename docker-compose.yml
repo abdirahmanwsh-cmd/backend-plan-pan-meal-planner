@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-meal_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-your_password}
+      POSTGRES_DB: ${POSTGRES_DB:-meal_planner}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    restart: always
+    depends_on:
+      - db
+    environment:
+      # Point the app to the docker-compose Postgres service
+      DATABASE_URL: postgresql://${POSTGRES_USER:-meal_user}:${POSTGRES_PASSWORD:-your_password}@db:5432/${POSTGRES_DB:-meal_planner}
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+volumes:
+  db_data:
