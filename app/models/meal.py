@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 
@@ -11,7 +11,8 @@ class Meal(Base):
     calories = Column(Integer, nullable=False)
     # Comma-separated tags: "high-protein,breakfast"
     tags = Column(String, nullable=True)
-
+    is_favorite = Column(Boolean, default=False)  # ADDED THIS LINE
+    
     # Owner of the meal (optional for now)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     user = relationship("User")

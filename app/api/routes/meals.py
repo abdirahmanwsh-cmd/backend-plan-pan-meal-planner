@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.meal import Meal
-from app.schemas.meal import MealCreate, MealUpdate, MealOut  # REMOVED MealSuggestion
+from app.schemas.meal import MealCreate, MealUpdate, MealOut
 import random
 
 router = APIRouter(prefix="/meals", tags=["Meals"])
@@ -28,11 +28,19 @@ def get_meal(meal_id: int, db: Session = Depends(get_db)):
 # Create a new meal
 @router.post("/", response_model=MealOut)
 def create_meal(data: MealCreate, db: Session = Depends(get_db)):
-    new_meal = Meal(**data.dict())
-    db.add(new_meal)
-    db.commit()
-    db.refresh(new_meal)
-    return new_meal
+    try:
+        # Convert Pydantic model to dict and create SQLAlchemy model
+        meal_data = data.dict()
+        new_meal = Meal(**meal_data)
+        db.add(new_meal)
+        db.commit()
+        db.refresh(new_meal)
+        return new_meal
+    except Exception as e:
+        db.rollback()
+        # Log the actual error for debugging
+        print(f"Error creating meal: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create meal: {str(e)}")
 
 
 # Update an existing meal
@@ -42,12 +50,17 @@ def update_meal(meal_id: int, data: MealUpdate, db: Session = Depends(get_db)):
     if not meal:
         raise HTTPException(404, "Meal not found")
 
-    for key, value in data.dict().items():
+    update_data = data.dict(exclude_unset=True)  # Only include fields that were provided
+    for key, value in update_data.items():
         setattr(meal, key, value)
 
-    db.commit()
-    db.refresh(meal)
-    return meal
+    try:
+        db.commit()
+        db.refresh(meal)
+        return meal
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update meal: {str(e)}")
 
 
 # Delete meal
@@ -57,9 +70,13 @@ def delete_meal(meal_id: int, db: Session = Depends(get_db)):
     if not meal:
         raise HTTPException(404, "Meal not found")
 
-    db.delete(meal)
-    db.commit()
-    return {"message": f"Meal {meal_id} deleted"}
+    try:
+        db.delete(meal)
+        db.commit()
+        return {"message": f"Meal {meal_id} deleted"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete meal: {str(e)}")
 
 
 # Favourite toggle
@@ -69,14 +86,18 @@ def toggle_favorite(meal_id: int, db: Session = Depends(get_db)):
     if not meal:
         raise HTTPException(404, "Meal not found")
 
-    # simple flip
-    meal.is_favorite = not meal.is_favorite
-    db.commit()
-    db.refresh(meal)
-    return meal
+    try:
+        # simple flip
+        meal.is_favorite = not meal.is_favorite
+        db.commit()
+        db.refresh(meal)
+        return meal
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to toggle favorite: {str(e)}")
 
 
-# Get meal suggestion - FIXED: Changed MealResponse to MealOut
+# Get meal suggestion
 @router.get("/suggestion", response_model=MealOut)
 def get_meal_suggestion(db: Session = Depends(get_db)):
     # Get a random meal - simple implementation
