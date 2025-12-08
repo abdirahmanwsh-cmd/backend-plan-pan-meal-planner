@@ -1,2 +1,27 @@
 app/serviceAccountKey.json
 serviceAccountKey.json
+
+# Python cache
+_pycache_/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtualenvs
+venv/
+.venv/
+env/
+.env/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# DB files
+*.db
+*.sqlite3
+
+# Secrets
+*.env
+firebase-key.json

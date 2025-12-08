@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.meal import Meal
-from app.schemas.meal import MealCreate, MealUpdate, MealOut, MealSuggestion
+from app.schemas.meal import MealCreate, MealUpdate, MealOut  # REMOVED MealSuggestion
 import random
 
 router = APIRouter(prefix="/meals", tags=["Meals"])
@@ -76,30 +76,11 @@ def toggle_favorite(meal_id: int, db: Session = Depends(get_db)):
     return meal
 
 
-# Daily suggestion (favourite first, fallback to random)
-@router.get("/suggestion/today", response_model=MealSuggestion)
-def daily_suggestion(db: Session = Depends(get_db)):
-    favorites = db.query(Meal).filter(Meal.is_favorite == True).all()
-    all_meals = db.query(Meal).all()
-
-    if favorites:
-        # If user has favourites, pick one
-        pick = random.choice(favorites)
-        return MealSuggestion(
-            id=pick.id,
-            name=pick.name,
-            calories=pick.calories,
-            reason="favorite"
-        )
-
-    if all_meals:
-        pick = random.choice(all_meals)
-        return MealSuggestion(
-            id=pick.id,
-            name=pick.name,
-            calories=pick.calories,
-            reason="random"
-        )
-
-    # No meals at all
-    raise HTTPException(404, "No meals exist yet")
+# Get meal suggestion - FIXED: Changed MealResponse to MealOut
+@router.get("/suggestion", response_model=MealOut)
+def get_meal_suggestion(db: Session = Depends(get_db)):
+    # Get a random meal - simple implementation
+    meals = db.query(Meal).all()
+    if not meals:
+        raise HTTPException(status_code=404, detail="No meals available")
+    return random.choice(meals)
