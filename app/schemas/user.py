@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr
 class UserOut(BaseModel):
     id: int
     email: EmailStr
-    name: Optional[str] = None  # Python 3.8-friendly
+    name: Optional[str] = None  
 
     class Config:
         from_attributes = True

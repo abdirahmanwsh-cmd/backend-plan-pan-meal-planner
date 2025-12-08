@@ -70,3 +70,12 @@ def toggle_favorite(meal_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"favorite": meal.is_favorite}
 
+# ADD THIS ENDPOINT TO FIX THE /meals/suggestion ERROR
+@router.get("/suggestion", response_model=MealResponse)
+def get_meal_suggestion(db: Session = Depends(get_db)):
+    # Get a random meal - simple implementation
+    import random
+    meals = db.query(Meal).all()
+    if not meals:
+        raise HTTPException(status_code=404, detail="No meals available")
+    return random.choice(meals)
