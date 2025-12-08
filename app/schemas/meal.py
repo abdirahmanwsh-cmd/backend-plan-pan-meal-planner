@@ -11,7 +11,7 @@ class MealBase(BaseModel):
 
 # For creating a new meal
 class MealCreate(MealBase):
-    pass
+    pass  
 
 
 # For updates (keeping it simple for the sprint)
@@ -26,15 +26,4 @@ class MealOut(MealBase):
     user_id: Optional[int] = None
 
     class Config:
-        orm_mode = True
-
-
-# For daily suggestion endpoint
-class MealSuggestion(BaseModel):
-    id: int
-    name: str
-    calories: int
-    reason: str  # e.g. "favourite" or "random pick"
-
-    class Config:
-        orm_mode = True
+        from_attributes = True  # allows returning SQLAlchemy models directly
