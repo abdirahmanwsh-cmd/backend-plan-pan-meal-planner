@@ -8,7 +8,7 @@ A FastAPI backend for meal planning and management with PostgreSQL database.
 - **Base URL:** https://backend-plan-pan-meal-planner.onrender.com/
 - **API Documentation:** https://backend-plan-pan-meal-planner.onrender.com/docs
 - **Alternative Docs:** https://backend-plan-pan-meal-planner.onrender.com/redoc
-
+- **Frontend repo:** https://github.com/abdirahmanwsh-cmd/frontend-plan-pan-meal-planner
 ## Features
 
 - User authentication with Firebase
