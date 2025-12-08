@@ -1,0 +1,19 @@
+# Render service definitions: web (Docker) + managed Postgres database
+# See https://render.com/docs/render-yaml for more details.
+
+services:
+  - type: web
+    name: fitplate-api
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+    buildCommand: ""
+    startCommand: "gunicorn -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 app.server:app"
+    healthCheckPath: "/docs"
+    autoDeploy: true
+
+databases:
+  - name: fitplate-db
+    plan: starter
+    region: oregon
