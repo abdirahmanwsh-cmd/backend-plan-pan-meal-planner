@@ -24,4 +24,4 @@ class MealResponse(MealBase):
     user_id: Optional[int] = None
 
     class Config:
-        from_attributes = True  # allows returning SQLAlchemy models directly
+        from_attributes = True 
